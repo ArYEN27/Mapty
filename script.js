@@ -13,6 +13,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 class Workout{
     date = new Date();
     id = (Date.now() + '').slice(-10);
+    // type;
     
     constructor(coords, distance, duration) {
         // this.date= ...
@@ -73,11 +74,13 @@ class App{
     #map;
     #mapEvent;
     #workouts = [];
+    #mapZoomLevel = 13;
 
     constructor() {
         this._getPosition();
         form.addEventListener('submit', this._newWorkout.bind(this));
-        inputType.addEventListener('change', this._toggleElevationField );
+        inputType.addEventListener('change', this._toggleElevationField);
+        containerWorkouts.addEventListener('click', this._pantoPopup.bind(this));
     }
 
     _getPosition() {
@@ -95,7 +98,7 @@ class App{
         // console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
 
         const coords = [latitude, longitude];
-        this.#map = L.map('map').setView(coords, 13);
+        this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
         L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -192,9 +195,10 @@ class App{
     
     _renderWorkout(workout) {
         // distance, duration, cadence
+
         let html = `
         <li class="workout workout--${workout.type}" data-id="${workout.id}">
-          <h2 class="workout__title">Running on April 14</h2>
+          <h2 class="workout__title">Running on October 9</h2>
           <div class="workout__details">
             <span class="workout__icon">${workout.type == 'running' ? '🏃‍♂️' : '🚴‍♀️' }</span>
             <span class="workout__value">${workout.distance}</span>
@@ -237,7 +241,21 @@ class App{
           </li>`;
         }
 
-        form.insertAdjacentHTML('afterend',html)
+        form.insertAdjacentHTML('afterend', html)
+    }
+
+    _pantoPopup(e) {
+        const workoutEl = e.target.closest('.workout');
+
+        if (!workoutEl) return;
+
+        const workout = this.#workouts.find(work => work.id == workoutEl.dataset.id)
+        this.#map.setView(workout.coords, this.#mapZoomLevel, {
+            animate: true,
+            pan: {
+                duration: 1                
+            }
+        }); 
     }
 
 };
