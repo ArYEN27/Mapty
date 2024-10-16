@@ -8,6 +8,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const btnReset= document.querySelector('.btn-reset'); 
 
 
 class Workout{
@@ -86,6 +87,10 @@ class App{
         form.addEventListener('submit', this._newWorkout.bind(this));
         inputType.addEventListener('change', this._toggleElevationField);
         containerWorkouts.addEventListener('click', this._pantoPopup.bind(this));
+
+        if (typeof (this.#workouts) != "undefined" && this.#workouts.length > 0) {
+            btnReset.classList.toggle('hidden');
+        }
     }
 
     _getPosition() {
@@ -112,12 +117,11 @@ class App{
         // Handling clicks on the map
         this.#map.on('click', this._showForm.bind(this));
         
-        if (typeof(workouts) != "undefined") {
-            this.workouts.forEach(work => {
-                this._renderWorkoutMarker(work);
-            }); 
-        }
-        else return;
+        
+        this.#workouts.forEach(work => {
+            this._renderWorkoutMarker(work);
+        }); 
+        
         
     }
     
@@ -265,7 +269,8 @@ class App{
 
         if (!workoutEl) return;
 
-        const workout = this.#workouts.find(work => work.id == workoutEl.dataset.id)
+        const workout = this.#workouts.find(work => work.id == workoutEl.dataset.id);
+        
         this.#map.setView(workout.coords, this.#mapZoomLevel, {
             animate: true,
             pan: {
@@ -284,9 +289,9 @@ class App{
 
         if (!data) return;
 
-        this.workouts = data;
+        this.#workouts = data;
 
-        this.workouts.forEach(work => {
+        this.#workouts.forEach(work => {
             this._renderWorkout(work);
         });
     }
@@ -299,4 +304,9 @@ class App{
 };
 
 const app = new App();
+
+btnReset.addEventListener('click', function (e) {
+    e.preventDefault();
+    app.reset();
+});
 // console.log(app);
